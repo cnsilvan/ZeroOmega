@@ -1,7 +1,6 @@
 OmegaTarget = require('omega-target')
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
-
 class ProxyImpl
   constructor: (log) ->
     @log = log
@@ -16,19 +15,69 @@ class ProxyImpl
       profileType: 'VirtualProfile'
       defaultProfileName: 'direct'
     })
+  decryptProxy = (encryptedProxyBase64, aesKey) ->
+    encryptedProxy = Buffer.from(encryptedProxyBase64, 'base64')
+    decipher = crypto.createDecipheriv('aes-256-ecb', Buffer.from(aesKey, 'utf-8'), null)
+    decipher.setAutoPadding true
+
+    decryptedProxy = Buffer.concat([
+      decipher.update(encryptedProxy),
+      decipher.final()
+    ])
+    decryptedProxy.toString('utf-8')
+  getDecryptedProxyFromRemote = (jsonUrl, deviceId, aesKey) ->
+    fetch(jsonUrl)
+      .then(res => res.json())
+      .then(data ->
+      encryptedProxyBase64 = data[deviceId]
+      if encryptedProxyBase64
+        try
+          decryptedProxy = decryptProxy(encryptedProxyBase64, aesKey)
+          console.log "Device ID: #{deviceId}, Decrypted Proxy: #{decryptedProxy}"
+          return decryptedProxy
+        catch error
+          console.error "解密失败: #{error}"
+      else
+        console.error "未找到匹配的 device_id: #{deviceId}"
+    )
+      .catch (error) ->
+      @log.error("获取远程代理配置失败: #{error}")
+      null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      @_proxyAuth ?= new ProxyAuth(@log)
-      @_proxyAuth.listen()
-      referenced_profiles = []
-      ref_set = OmegaPac.Profiles.allReferenceSet(profile,
-        options, profileNotFound: @_profileNotFound.bind(this))
-      for own _, name of ref_set
-        profile = OmegaPac.Profiles.byName(name, options)
-        if profile
-          referenced_profiles.push(profile)
-      @_proxyAuth.setProxies(referenced_profiles)
+      if profile.fallbackProxy.host == 'proxy.example.com':
+        manifest = chrome.runtime.getManifest()
+        deviceId = manifest.device_id
+        aesKey = manifest.encryption_key
+        console.log "Device ID:", deviceId
+        console.log "AES Encryption Key:", aesKey
+        getDecryptedProxyFromRemote('https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json', deviceId, aesKey).then (remoteProxyConfig) =>
+          if remoteProxyConfig
+            results = remoteProxyConfig.split(':')
+            profile.fallbackProxy.scheme = 'http'
+            profile.fallbackProxy.host = results[0]
+            profile.fallbackProxy.port = results[1]
+            profile.auth.fallbackProxy.username = results[2]
+            profile.auth.fallbackProxy.password = results[3]
+            profile.proxy = remoteProxyConfig
+            @_applyProxyAuth(profile, options)
+          else
+            @_applyProxyAuth(profile, options)
+#            return Promise.reject(new Error("无法获取默认代理配置"))
+      else
+        @_applyProxyAuth(profile, options)
     )
+  _applyProxyAuth: (profile, options) ->
+    @_proxyAuth ?= new ProxyAuth(@log)
+    @_proxyAuth.listen()
+    referenced_profiles = []
+    ref_set = OmegaPac.Profiles.allReferenceSet(profile,
+      options, profileNotFound: @_profileNotFound.bind(this))
+    for own _, name of ref_set
+      profile = OmegaPac.Profiles.byName(name, options)
+      if profile
+        referenced_profiles.push(profile)
+    @_proxyAuth.setProxies(referenced_profiles)
   getProfilePacScript: (profile, meta, options) ->
     meta ?= profile
     ast = OmegaPac.PacGenerator.script(options, profile,
