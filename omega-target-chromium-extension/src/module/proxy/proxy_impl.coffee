@@ -56,7 +56,7 @@ class ProxyImpl
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      if ((profile.fallbackProxy&&profile.fallbackProxy.host == 'proxy.example.com')||(options["+proxy"]&&options["+proxy"].fallbackProxy.host=='proxy.example.com'))
+      if (profile.fallbackProxy?.host == 'proxy.example.com') or (options["+proxy"]?.fallbackProxy?.host == 'proxy.example.com')
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
