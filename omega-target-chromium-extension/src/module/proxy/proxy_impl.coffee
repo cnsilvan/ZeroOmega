@@ -45,30 +45,37 @@ class ProxyImpl
        @log.error("获取远程代理配置失败: #{error}")
        null
   setProxyAuth: (profile, options) ->
-    return Promise.try(=>
-      if profile.fallbackProxy.host == 'proxy.example.com':
-        manifest = chrome.runtime.getManifest()
-        deviceId = manifest.device_id
-        aesKey = manifest.encryption_key
-        console.log "Device ID:", deviceId
-        console.log "AES Encryption Key:", aesKey
-        getDecryptedProxyFromRemote('https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json', deviceId, aesKey).then (remoteProxyConfig) =>
-          if remoteProxyConfig
-            results = remoteProxyConfig.split(':')
-            profile.fallbackProxy.scheme = 'http'
-            profile.fallbackProxy.host = results[0]
-            profile.fallbackProxy.port = results[1]
-            profile.auth.fallbackProxy.username = results[2]
-            profile.auth.fallbackProxy.password = results[3]
-#            profile.proxy = remoteProxyConfig
-            @log.info("Proxy set from remote config: #{profile.fallbackProxy}, #{profile.auth.fallbackProxy}")
-            @_applyProxyAuth(profile, options)
-          else
-            @_applyProxyAuth(profile, options)
-#            return Promise.reject(new Error("无法获取默认代理配置"))
-      else
-        @_applyProxyAuth(profile, options)
-    )
+   return Promise.try(() =>
+    if profile.fallbackProxy.host == 'proxy.example.com'
+      manifest = chrome.runtime.getManifest()
+      deviceId = manifest.device_id
+      aesKey = manifest.encryption_key
+      console.log "Device ID:", deviceId
+      console.log "AES Encryption Key:", aesKey
+
+      getDecryptedProxyFromRemote(
+        'https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json',
+        deviceId,
+        aesKey
+      ).then (remoteProxyConfig) =>
+        if remoteProxyConfig
+          results = remoteProxyConfig.split(':')
+          profile.fallbackProxy.scheme = 'http'
+          profile.fallbackProxy.host = results[0]
+          profile.fallbackProxy.port = results[1]
+          profile.auth.fallbackProxy.username = results[2]
+          profile.auth.fallbackProxy.password = results[3]
+          # Uncomment if needed
+          # profile.proxy = remoteProxyConfig
+          @log.info("Proxy set from remote config: #{profile.fallbackProxy}, #{profile.auth.fallbackProxy}")
+          @_applyProxyAuth(profile, options)
+        else
+          @_applyProxyAuth(profile, options)
+# Uncomment if needed
+# return Promise.reject(new Error("无法获取默认代理配置"))
+    else
+      @_applyProxyAuth(profile, options)
+  )
   _applyProxyAuth: (profile, options) ->
     @_proxyAuth ?= new ProxyAuth(@log)
     @_proxyAuth.listen()
