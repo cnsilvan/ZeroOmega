@@ -1,4 +1,5 @@
 OmegaTarget = require('omega-target')
+# coffeelint: disable=max_line_length
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
 class ProxyImpl
@@ -41,8 +42,8 @@ class ProxyImpl
         console.error "未找到匹配的 device_id: #{deviceId}"
     )
       .catch (error) ->
-      @log.error("获取远程代理配置失败: #{error}")
-      null
+       @log.error("获取远程代理配置失败: #{error}")
+       null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
       if profile.fallbackProxy.host == 'proxy.example.com':
@@ -59,7 +60,8 @@ class ProxyImpl
             profile.fallbackProxy.port = results[1]
             profile.auth.fallbackProxy.username = results[2]
             profile.auth.fallbackProxy.password = results[3]
-            profile.proxy = remoteProxyConfig
+#            profile.proxy = remoteProxyConfig
+            @log.info("Proxy set from remote config: #{profile.fallbackProxy}, #{profile.auth.fallbackProxy}")
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)

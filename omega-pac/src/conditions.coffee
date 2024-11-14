@@ -3,7 +3,7 @@ IP = require 'ip-address'
 Url = require 'url'
 {shExp2RegExp, escapeSlash} = require './shexp_utils'
 {AttachedCache} = require './utils'
-
+# coffeelint: disable=max_line_length
 module.exports = exports =
   requestFromUrl: (url) ->
     if typeof url == 'string'

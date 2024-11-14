@@ -1,6 +1,6 @@
 Buffer = require('buffer').Buffer
 Conditions = require('./conditions')
-
+# coffeelint: disable=max_line_length
 strStartsWith = (str, prefix) ->
   str.substr(0, prefix.length) == prefix
 
