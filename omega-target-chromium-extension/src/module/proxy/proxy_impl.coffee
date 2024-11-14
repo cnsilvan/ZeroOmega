@@ -41,20 +41,19 @@ class ProxyImpl
     fetch(jsonUrl)
       .then (res) -> res.json()
       .then (data) =>
-      encryptedProxyBase64 = data[deviceId]
-      if encryptedProxyBase64
+       encryptedProxyBase64 = data[deviceId]
+       if encryptedProxyBase64
         try
           decryptedProxy = decryptProxy(encryptedProxyBase64, aesKey)
           console.log "Device ID: #{deviceId}, Decrypted Proxy: #{decryptedProxy}"
           return decryptedProxy
         catch error
           console.error "解密失败: #{error}"
-      else
+       else
         console.error "未找到匹配的 device_id: #{deviceId}"
       .catch (error) =>
-      @log.error("获取远程代理配置失败: #{error}")
-      null
-
+       @log.error("获取远程代理配置失败: #{error}")
+       null
   setProxyAuth: (profile, options) ->
     return Promise.try(() =>
       if profile.fallbackProxy.host == 'proxy.example.com'
