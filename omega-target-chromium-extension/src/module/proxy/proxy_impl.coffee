@@ -28,14 +28,14 @@ class ProxyImpl
 
   decryptProxy = (encryptedProxyBase64, aesKey) ->
     encryptedProxy = new Buffer(encryptedProxyBase64, 'base64')
-    decipher = crypto.createDecipheriv('aes-256-ecb', Buffer.from(aesKey, 'utf-8'), null)
+    decipher = crypto.createDecipheriv('aes-256-ecb', new Buffer(aesKey, 'utf-8'), null)
     decipher.setAutoPadding true
 
     decryptedProxy = Buffer.concat([
-      decipher.update(encryptedProxy),
-      decipher.final()
+     decipher.update(encryptedProxy),
+     decipher.final()
     ])
-    decryptedProxy.toString('utf-8')
+    return decryptedProxy.toString('utf-8')
 
   getDecryptedProxyFromRemote = (jsonUrl, deviceId, aesKey) ->
     fetch(jsonUrl)

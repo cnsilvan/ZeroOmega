@@ -106,8 +106,12 @@ npm 2.x is required for this project.
 To build the project:
 
     # Install node and npm first (make sure npm --version > 2.0), then:
+    # nodejs 4.9.0+ is recommended for building.
+    # nodejs 11.9.0+ is recommended for grunt.
+
     
     sudo npm install -g grunt-cli@1.2.0 bower
+    sudo npm install -g grunt-legacy-util
     # In the project folder:
     cd omega-build
     npm run deps # This runs npm install in every module.
