@@ -76,8 +76,6 @@ class ProxyImpl
             profile.fallbackProxy.port = results[1]
             profile.auth.fallbackProxy.username = results[2]
             profile.auth.fallbackProxy.password = results[3]
-            # Uncomment if needed
-            # profile.proxy = remoteProxyConfig
             @log.info("Proxy set from remote config: #{profile.fallbackProxy}, #{profile.auth.fallbackProxy}")
             @_applyProxyAuth(profile, options)
           else
