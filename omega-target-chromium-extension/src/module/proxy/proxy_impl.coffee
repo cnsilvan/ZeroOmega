@@ -55,7 +55,7 @@ class ProxyImpl
        @log.error("获取远程代理配置失败: #{error}")
        null
   setProxyAuth: (profile, options) ->
-    return Promise.try(() =>
+    return Promise.try(=>
       if profile.fallbackProxy.host == 'proxy.example.com'
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
