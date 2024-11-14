@@ -2,7 +2,7 @@ OmegaTarget = require('omega-target')
 # coffeelint: disable=max_line_length
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
-
+crypto = require('crypto')
 class ProxyImpl
   constructor: (log) ->
     @log = log
@@ -27,7 +27,7 @@ class ProxyImpl
     })
 
   decryptProxy = (encryptedProxyBase64, aesKey) ->
-    encryptedProxy = Buffer.from(encryptedProxyBase64, 'base64')
+    encryptedProxy = new Buffer(encryptedProxyBase64, 'base64')
     decipher = crypto.createDecipheriv('aes-256-ecb', Buffer.from(aesKey, 'utf-8'), null)
     decipher.setAutoPadding true
 
@@ -56,7 +56,7 @@ class ProxyImpl
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      if profile.fallbackProxy.host == 'proxy.example.com'
+      if ((profile.fallbackProxy&&profile.fallbackProxy.host == 'proxy.example.com')||(options["+proxy"]&&options["+proxy"].fallbackProxy.host=='proxy.example.com'))
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
