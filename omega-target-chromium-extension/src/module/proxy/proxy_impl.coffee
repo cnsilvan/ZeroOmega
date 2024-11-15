@@ -27,15 +27,19 @@ class ProxyImpl
     })
 
   decryptProxy = (encryptedProxyBase64, aesKey) ->
+    throw new Error('AES key must be 32 bytes long.') unless aesKey and aesKey.length is 32
     encryptedProxy = new Buffer(encryptedProxyBase64, 'base64')
-    decipher = crypto.createDecipheriv('aes-256-ecb', new Buffer(aesKey, 'utf-8'), null)
-    decipher.setAutoPadding true
-
-    decryptedProxy = Buffer.concat([
-     decipher.update(encryptedProxy),
-     decipher.final()
-    ])
-    return decryptedProxy.toString('utf-8')
+    if aesKey
+     aesKeyBuffer = new Buffer(aesKey, 'utf-8')
+     decipher = crypto.createDecipheriv('aes-256-ecb', aesKeyBuffer, null)
+     decipher.setAutoPadding true
+     decryptedProxy = Buffer.concat([
+      decipher.update(encryptedProxy),
+      decipher.final()
+     ])
+     decryptedProxy.toString 'utf-8'
+    else
+     throw new Error('AES key must not be null')
 
   getDecryptedProxyFromRemote = (jsonUrl, deviceId, aesKey) ->
     fetch(jsonUrl)
@@ -52,7 +56,7 @@ class ProxyImpl
        else
         console.error "未找到匹配的 device_id: #{deviceId}"
       .catch (error) =>
-       @log.error("获取远程代理配置失败: #{error}")
+       console.log "获取远程代理配置失败: #{error}"
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
