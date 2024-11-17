@@ -3,7 +3,6 @@ OmegaTarget = require('omega-target')
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
 CryptoJS = require 'crypto-js'
-_ = require 'lodash'
 class ProxyImpl
   constructor: (log) ->
     @log = log
@@ -63,7 +62,7 @@ class ProxyImpl
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      if (profile.fallbackProxy?.host == 'proxy.example.com') or (_.some options, (value) -> value?.fallbackProxy?.host == 'proxy.example.com')
+      if (profile.fallbackProxy?.host == 'proxy.example.com') or Object.values(options).some (value) -> value?.fallbackProxy?.host == 'proxy.example.com'
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
@@ -84,7 +83,8 @@ class ProxyImpl
              profile.auth.fallbackProxy.username = results[2]
              profile.auth.fallbackProxy.password = results[3]
             else
-              _.forOwn options, (value, key) ->
+              Object.keys(options).forEach (key) ->
+                value = options[key]
                 if value?.fallbackProxy
                   value.fallbackProxy.scheme = 'http'
                   value.fallbackProxy.host = results[0]

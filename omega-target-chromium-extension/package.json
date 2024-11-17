@@ -23,7 +23,6 @@
   "dependencies": {
     "crypto-js": "^4.2.0",
     "heap": "^0.2.6",
-    "lodash": "^4.17.21",
     "omega-pac": "../omega-pac",
     "omega-target": "../omega-target",
     "omega-web": "../omega-web",
