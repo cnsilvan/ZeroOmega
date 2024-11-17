@@ -62,7 +62,9 @@ class ProxyImpl
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      if (profile.fallbackProxy?.host == 'proxy.example.com') or Object.values(options).some (value) -> value?.fallbackProxy?.host == 'proxy.example.com'
+      hasFallbackProxy = profile.fallbackProxy?.host == 'proxy.example.com' or Object.values(options).some (value) ->
+      value?.fallbackProxy?.host == 'proxy.example.com'
+      if hasFallbackProxy
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
@@ -84,13 +86,13 @@ class ProxyImpl
              profile.auth.fallbackProxy.password = results[3]
             else
               Object.keys(options).forEach (key) ->
-                value = options[key]
-                if value?.fallbackProxy
-                  value.fallbackProxy.scheme = 'http'
-                  value.fallbackProxy.host = results[0]
-                  value.fallbackProxy.port = results[1]
-                  value.auth.fallbackProxy.username = results[2]
-                  value.auth.fallbackProxy.password = results[3]
+              value = options[key]
+              if value?.fallbackProxy
+                value.fallbackProxy.scheme = 'http'
+                value.fallbackProxy.host = results[0]
+                value.fallbackProxy.port = results[1]
+                value.auth.fallbackProxy.username = results[2]
+                value.auth.fallbackProxy.password = results[3]
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)
