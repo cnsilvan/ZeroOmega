@@ -69,8 +69,7 @@ class ProxyImpl
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
         console.log "Device ID:", deviceId
-
-        @getDecryptedProxyFromRemote(
+        getDecryptedProxyFromRemote(
           'https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json',
           deviceId,
           aesKey
@@ -80,7 +79,7 @@ class ProxyImpl
             if profile.fallbackProxy
               profile.fallbackProxy.scheme = 'http'
               profile.fallbackProxy.host = results[0]
-              profile.fallbackProxy.port = results[1]
+              profile.fallbackProxy.port = parseInt(results[1])
               profile.auth.fallbackProxy.username = results[2]
               profile.auth.fallbackProxy.password = results[3]
             else
@@ -89,9 +88,8 @@ class ProxyImpl
                 if value?.fallbackProxy
                   value.fallbackProxy.scheme = 'http'
                   value.fallbackProxy.host = results[0]
-                  value.fallbackProxy.port = results[1]
-                  value.auth.fallbackProxy.username = results[2]
-                  value.auth.fallbackProxy.password = results[3]
+                  value.fallbackProxy.port = parseInt(results[1])
+                  value['auth']={'fallbackProxy':{'username':results[2],'password':results[3]}}
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)
