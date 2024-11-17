@@ -3,6 +3,7 @@ OmegaTarget = require('omega-target')
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
 CryptoJS = require 'crypto-js'
+_ = require 'lodash'
 class ProxyImpl
   constructor: (log) ->
     @log = log
