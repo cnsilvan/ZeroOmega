@@ -51,7 +51,7 @@ class ProxyImpl
        if encryptedProxyBase64
         try
           decryptedProxy = decryptProxy(encryptedProxyBase64, aesKey)
-          console.log "Device ID: #{deviceId}, Decrypted Proxy: #{decryptedProxy}"
+#          console.log "Device ID: #{deviceId}, Decrypted Proxy: #{decryptedProxy}"
           return decryptedProxy
         catch error
           console.error "解密失败: #{error}"
@@ -62,12 +62,12 @@ class ProxyImpl
        null
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
-      if (profile.fallbackProxy?.host == 'proxy.example.com') or (options["+proxy"]?.fallbackProxy?.host == 'proxy.example.com')
+      if (profile.fallbackProxy?.host == 'proxy.example.com') or (_.some options, (value) -> value?.fallbackProxy?.host == 'proxy.example.com')
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
         console.log "Device ID:", deviceId
-        console.log "AES Encryption Key:", aesKey
+#        console.log "AES Encryption Key:", aesKey
 
         getDecryptedProxyFromRemote(
           'https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json',
@@ -76,12 +76,20 @@ class ProxyImpl
         ).then (remoteProxyConfig) =>
           if remoteProxyConfig
             results = remoteProxyConfig.split(':')
-            profile.fallbackProxy.scheme = 'http'
-            profile.fallbackProxy.host = results[0]
-            profile.fallbackProxy.port = results[1]
-            profile.auth.fallbackProxy.username = results[2]
-            profile.auth.fallbackProxy.password = results[3]
-            @log.info("Proxy set from remote config: #{profile.fallbackProxy}, #{profile.auth.fallbackProxy}")
+            if profile.fallbackProxy
+             profile.fallbackProxy.scheme = 'http'
+             profile.fallbackProxy.host = results[0]
+             profile.fallbackProxy.port = results[1]
+             profile.auth.fallbackProxy.username = results[2]
+             profile.auth.fallbackProxy.password = results[3]
+            else
+              _.forOwn options, (value, key) ->
+                if value?.fallbackProxy
+                  value.fallbackProxy.scheme = 'http'
+                  value.fallbackProxy.host = results[0]
+                  value.fallbackProxy.port = results[1]
+                  value.auth.fallbackProxy.username = results[2]
+                  value.auth.fallbackProxy.password = results[3]
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)
