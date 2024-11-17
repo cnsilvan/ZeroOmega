@@ -2,7 +2,7 @@ OmegaTarget = require('omega-target')
 # coffeelint: disable=max_line_length
 Promise = OmegaTarget.Promise
 ProxyAuth = require('./proxy_auth')
-crypto = require('crypto')
+CryptoJS = require 'crypto-js'
 class ProxyImpl
   constructor: (log) ->
     @log = log
@@ -27,19 +27,21 @@ class ProxyImpl
     })
 
   decryptProxy = (encryptedProxyBase64, aesKey) ->
+# 检查 AES 密钥是否存在且长度为 32 字节
     throw new Error('AES key must be 32 bytes long.') unless aesKey and aesKey.length is 32
-    encryptedProxy = new Buffer(encryptedProxyBase64, 'base64')
-    if aesKey
-     aesKeyBuffer = new Buffer(aesKey, 'utf-8')
-     decipher = crypto.createDecipheriv('aes-256-ecb', aesKeyBuffer, null)
-     decipher.setAutoPadding true
-     decryptedProxy = Buffer.concat([
-      decipher.update(encryptedProxy),
-      decipher.final()
-     ])
-     decryptedProxy.toString 'utf-8'
-    else
-     throw new Error('AES key must not be null')
+  # Base64 解码
+    encryptedBytes = CryptoJS.enc.Base64.parse encryptedProxyBase64
+  # 将 AES 密钥转换为 UTF-8 格式
+    aesKeyUtf8 = CryptoJS.enc.Utf8.parse aesKey
+  # 解密操作
+    decrypted = CryptoJS.AES.decrypt(
+     { ciphertext: encryptedBytes },  # 密文
+     aesKeyUtf8,                      # AES 密钥
+     mode: CryptoJS.mode.ECB,         # 加密模式为 ECB
+     padding: CryptoJS.pad.Pkcs7      # 填充方式为 PKCS#7
+    )
+   # 返回解密后的字符串
+    decrypted.toString CryptoJS.enc.Utf8
 
   getDecryptedProxyFromRemote = (jsonUrl, deviceId, aesKey) ->
     fetch(jsonUrl)

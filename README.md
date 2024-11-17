@@ -108,6 +108,7 @@ To build the project:
     # Install node and npm first (make sure npm --version > 2.0), then:
     # nodejs 4.9.0+ is recommended for building.
     # nodejs 11.9.0+ is recommended for grunt.
+    # nodejs v18.20.5+ is recommended for all.
 
     
     sudo npm install -g grunt-cli@1.2.0 bower

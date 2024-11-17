@@ -21,10 +21,11 @@
     "po2json": "^0.3.2"
   },
   "dependencies": {
+    "crypto-js": "^4.2.0",
     "heap": "^0.2.6",
+    "omega-pac": "../omega-pac",
     "omega-target": "../omega-target",
     "omega-web": "../omega-web",
-    "omega-pac": "../omega-pac",
     "xhr": "^1.16.0"
   },
   "browser": {
