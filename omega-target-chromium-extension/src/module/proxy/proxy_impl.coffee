@@ -92,7 +92,10 @@ class ProxyImpl
                   value.fallbackProxy.scheme = 'http'
                   value.fallbackProxy.host = results[0]
                   value.fallbackProxy.port = parseInt(results[1])
-                  value['auth']={'fallbackProxy':{'username':results[2],'password':results[3]}}
+                  value['auth'] =
+                    fallbackProxy:
+                      username: results[2]
+                      password: results[3]
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)
