@@ -66,7 +66,7 @@ class ProxyImpl
         value?.fallbackProxy?.host == 'proxy.example.com'
       if !hasFallbackProxy
         hasFallbackProxy = profile.fallbackProxy?.host == '' or Object.values(options).some (value) ->
-        value?.fallbackProxy?.host == ''
+          value?.fallbackProxy?.host == ''
       if hasFallbackProxy
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
