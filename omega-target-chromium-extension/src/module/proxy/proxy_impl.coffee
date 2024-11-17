@@ -63,15 +63,14 @@ class ProxyImpl
   setProxyAuth: (profile, options) ->
     return Promise.try(=>
       hasFallbackProxy = profile.fallbackProxy?.host == 'proxy.example.com' or Object.values(options).some (value) ->
-      value?.fallbackProxy?.host == 'proxy.example.com'
+        value?.fallbackProxy?.host == 'proxy.example.com'
       if hasFallbackProxy
         manifest = chrome.runtime.getManifest()
         deviceId = manifest.device_id
         aesKey = manifest.encryption_key
         console.log "Device ID:", deviceId
-#        console.log "AES Encryption Key:", aesKey
 
-        getDecryptedProxyFromRemote(
+        @getDecryptedProxyFromRemote(
           'https://raw.githubusercontent.com/cnsilvan/node-x/refs/heads/main/depin/proxy.json',
           deviceId,
           aesKey
@@ -79,20 +78,20 @@ class ProxyImpl
           if remoteProxyConfig
             results = remoteProxyConfig.split(':')
             if profile.fallbackProxy
-             profile.fallbackProxy.scheme = 'http'
-             profile.fallbackProxy.host = results[0]
-             profile.fallbackProxy.port = results[1]
-             profile.auth.fallbackProxy.username = results[2]
-             profile.auth.fallbackProxy.password = results[3]
+              profile.fallbackProxy.scheme = 'http'
+              profile.fallbackProxy.host = results[0]
+              profile.fallbackProxy.port = results[1]
+              profile.auth.fallbackProxy.username = results[2]
+              profile.auth.fallbackProxy.password = results[3]
             else
               Object.keys(options).forEach (key) ->
-              value = options[key]
-              if value?.fallbackProxy
-                value.fallbackProxy.scheme = 'http'
-                value.fallbackProxy.host = results[0]
-                value.fallbackProxy.port = results[1]
-                value.auth.fallbackProxy.username = results[2]
-                value.auth.fallbackProxy.password = results[3]
+                value = options[key]
+                if value?.fallbackProxy
+                  value.fallbackProxy.scheme = 'http'
+                  value.fallbackProxy.host = results[0]
+                  value.fallbackProxy.port = results[1]
+                  value.auth.fallbackProxy.username = results[2]
+                  value.auth.fallbackProxy.password = results[3]
             @_applyProxyAuth(profile, options)
           else
             @_applyProxyAuth(profile, options)
